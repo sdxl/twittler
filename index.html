@@ -1,27 +1,118 @@
 <!DOCTYPE html>
 <html>
   <head>
+    <link type="text/css" rel="stylesheet" href="stylesheet.css"/>
     <script src="jquery.js"></script>
     <script src="data_generator.js"></script>
   </head>
   <body>
+      
+      <div class="header">
+          <h1> Twittler</h1>
+          <p> A Twitter Clone </p>
+      </div>
+
+      <div class="master">
+          <div class="left">
+          </div>
+          
+          <div class="mid">
+            <div id="currentfeed">Viewing All Tweets</div>
+                <span id="backtocurrentfeed">Return to Current Feed</span>
+            <div class="newtweets"></div>
+            <div class= "tweetstream"></div>
+          </div>
+
+      </div>
+
     <script>
 
-      $(document).ready(function(){
-        var $body = $('body');
-        $body.html('');
+    $(document).ready(function(){
+        
+      var tweetsShown;
 
-        var index = streams.home.length - 1;
+      // create a function to show the tweets
+      function showNewTweets(user){
+
+        var $body = $('.tweetstream');
+
+        if(user){
+          var arr = streams.users[user];
+          var index = arr.length  - 1
+        }
+
+        else{
+          var arr = streams.home;
+          tweetsShown = arr.length;
+          var index = tweetsShown - 1;
+        }
+        
+        
         while(index >= 0){
-          var tweet = streams.home[index];
-          var $tweet = $('<div></div>');
-          $tweet.text('@' + tweet.user + ': ' + tweet.message);
+          var tweet = arr[index];
+          var $tweet = $('<div class="tweet">' + 
+            '<span class="user" data-name=' + tweet.user + '>' + '@' + tweet.user + 
+            '</span>' + " " + tweet.message + 
+            '<br>' + '<br>' + tweet.created_at +
+            '</div>');
+          
+
           $tweet.appendTo($body);
           index -= 1;
         }
+      }
 
+      //determine how many new tweets there are and alert the user
+      // totalTweets = streams.home.length
+      // newTweets = totalTweets - TweetsShown/
+        var stop;
+        var tweetTimer = function(){
+          stop = setInterval(function(){
+          var totalTweets = streams.home.length
+          if (totalTweets > tweetsShown){
+            var newTweets = totalTweets - tweetsShown;
+            $('.newtweets').text('There are ' + newTweets + ' new tweets.');
+            $('.newtweets').show();
+          }
+        }, 5000)
+     }     
+      showNewTweets();
+      tweetTimer();
+
+      $('.newtweets').on('click', function(){
+          //clearInterval(stop);
+          $('.newtweets').hide();
+          $('.tweetstream').empty();
+          showNewTweets();
+         //tweetTimer;
+          
+      })
+
+      $('.mid').on('click', '.user', function(){
+          clearInterval(stop);
+          $('.newtweets').hide();
+          $('.tweetstream').empty();
+          $('#currentfeed').hide();
+          $('#backtocurrentfeed').show(); 
+          var user = $(this).data("name");
+          showNewTweets(user);
+      })
+
+      $('#backtocurrentfeed').on('click', function(){
+        $(this).hide();
+        $('#currentfeed').show();
+        $('.newtweets').hide();
+        $('.tweetstream').empty();
+        showNewTweets();
+        tweetTimer()
+      })
+      //insert notification of user's additional tweets while on said user's page
+      // insert notification of all followed users' tweeting activity
+      
       });
 
     </script>
+
+
   </body>
 </html>
